@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
 import { CommentDocument, CommentInput } from "../model/comment.model"
 import commentService from "../services/comment.service"
+import jwt from "jsonwebtoken";
 
 class commentController {
 
-    public async create(req: Request, res: Response){
+    public async createComment(req: Request, res: Response){
         try {
-            const user: CommentDocument = await commentService.create(req.body as CommentInput);
+            const idUser = req.params.id;
+            const user: CommentDocument = await commentService.create(req.body as CommentInput, idUser);
             res.status(201).json(user);
+            return user;
         } catch (error) {
             res.status(500).json(error);
         }

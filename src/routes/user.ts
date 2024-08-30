@@ -11,6 +11,7 @@ export const router = express.Router();
 //router.post("/", validateSchema(userSchema), userController.create);
 //router.post("/login", validateSchema(loginSchema), userController.login);
 
+router.post("/login", userController.login);
 router.post("/", userController.create);
 
 
