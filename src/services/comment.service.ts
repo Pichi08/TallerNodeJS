@@ -9,7 +9,9 @@ class CommentService {
     public async create(userInput: CommentInput, userId: string){
 
         try {
-            userService.addComment(userId, userInput);
+            
+            const user: any | null = await userService.addComment(userId, userInput);
+            return user;
         } catch (error) {
             throw error;
         }

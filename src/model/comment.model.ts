@@ -11,11 +11,11 @@ export interface CommentDocument extends CommentInput, mongoose.Document {
 }
 
 const commentSchema = new mongoose.Schema({
-    writer: {
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    },
-    comment: {type: String, required: true },
+    // writer: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: "User"
+    // },
+    comment: {type: String, required: true},
     reactions: [{
         type: Schema.Types.ObjectId,
         ref: 'Reaction',

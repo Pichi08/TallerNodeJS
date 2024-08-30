@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import UserModel, {UserDocument, UserInput} from "../model/user.model";
 import { CommentInput } from "../model/comment.model";
+import mongoose from "mongoose";
 
 class UserService {
 
@@ -21,11 +22,14 @@ class UserService {
 
     }
 
-    public async addComment(userId: string, comment: CommentInput) {
+    public async addComment(userId: string, comment: CommentInput): Promise<UserDocument | null> {
 
         try{
-
-            UserModel.findByIdAndUpdate(userId, {$push: {comments: comment}});
+            console.log(`comentario ${comment.comment}`)
+            
+            console.log(`${mongoose.isValidObjectId(userId)}`);
+            const user: UserDocument | null = await UserModel.findByIdAndUpdate(userId, {$push: {comments: comment.comment}});
+            return user;
 
         } catch (error) {
             throw error;

@@ -4,4 +4,4 @@ import {auth} from "../middlewares/auth"
 
 export const router = express.Router();
 
-router.post("/", auth, commentController.create);
+router.post("/", auth, commentController.createComment);
