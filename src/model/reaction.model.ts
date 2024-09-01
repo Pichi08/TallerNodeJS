@@ -1,19 +1,25 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
+export interface ReactionInput {
+    reaction: string; 
+    commentOwner: mongoose.Types.ObjectId; 
+    comment: mongoose.Types.ObjectId; 
 
-export interface ReactionDocument extends mongoose.Document {
-    createdAt: Date,
-    updateAt: Date,
-    deleteAt: Date,
 }
 
-const reactionSchema = new mongoose.Schema({
-    reaction: String,
-    ownerComment: {
-        type: Schema.Types.ObjectId,
-        ref: "Comment"
-    }
-}, {timestamps: true, collection: "users"});
+export interface ReactionDocument extends ReactionInput, Document {
+    createdAt: Date,
+    updatedAt: Date,
+    owner: mongoose.Types.ObjectId; 
+
+}
+
+const reactionSchema = new Schema<ReactionDocument>({
+    reaction: { type: String, required: true }, 
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
+    commentOwner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
+    comment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', required: true }, 
+}, { timestamps: true }); 
 
 const Reaction = mongoose.model<ReactionDocument>("Reaction", reactionSchema);
 
