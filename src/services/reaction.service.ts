@@ -1,10 +1,10 @@
 import UserModel, {UserDocument, UserInput} from "../model/user.model";
-import ReactionModel, {ReactionDocument,ReactionInput}  from "../model/reaction.model";
-
+import ReactionModel, {ReactionDocument,ReactionInput}  from "../model/reaction.model"
 class ReactionService {
 
 
     public async createReaction(reactionInput: ReactionInput, userId: string) {
+        //let reaction = reactionInput.reaction;
         const newReaction = new ReactionModel({
             reaction: reactionInput.reaction,
             owner: userId,

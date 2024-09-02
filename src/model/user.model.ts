@@ -4,7 +4,8 @@ import { commentSchema, Comment } from "./comment.model";  // Importa el esquema
 export interface UserInput {
     name: string,
     email: string,
-    password: string
+    password: string,
+    rol: string;
 }
 
 
@@ -19,6 +20,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, index: true, unique: true },
     password: { type: String, required: true },
+    rol: {type: String, default: 'user', required: true, enum: ['superadmin','user']},
     comments: [commentSchema]  // Usa el esquema importado
 }, { timestamps: true, collection: "users" });
 

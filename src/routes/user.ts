@@ -1,6 +1,7 @@
 import express from "express";
 import userController from "../controllers/user.controller";
 import {auth} from "../middlewares/auth"
+import { rol } from "../middlewares/rol"
 //import validateSchema from "../middlewares/validSchema";
 //import userSchema from "../schemas/user.schemas";
 //import loginSchema from "../schemas/user.schemas"
@@ -13,15 +14,12 @@ export const router = express.Router();
 //router.post("/login", validateSchema(loginSchema), userController.login);
 
 router.post("/login", userController.login);
-router.post("/", userController.createUser);
-
-router.get("/", userController.getAll);
+router.post("/",auth,rol(['superadmin']),userController.createUser);
+router.put("/:idUser",auth,rol(['superadmin']), userController.update);
+router.delete("/:idUser",auth,rol(['superadmin']), userController.delete);
+router.get("/",auth, userController.getAll);
 
 //router.get("/profile", auth, userController.getUser)
 
-router.get("/:id", userController.getUser);
-
-router.put("/:id", userController.update);
-
-router.delete("/:id", userController.delete);
+//router.get("/:id", userController.getUser);
 
