@@ -23,7 +23,7 @@ export const commentSchema = new mongoose.Schema({
     //idComment: { type: String, required: true },
     comment: { type: String, required: true },
     id_owner: { type: String},
-    parent: { type: String},
+    parent: { type: mongoose.Schema.ObjectId},
     reactions: [{
         type: mongoose.Schema.ObjectId,
         ref: "Reaction"

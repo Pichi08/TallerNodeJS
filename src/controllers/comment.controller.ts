@@ -73,7 +73,7 @@ class commentController {
 
     public async getAll(req: Request, res: Response){
         try {
-            const users: UserDocument[] = await commentService.getAll();
+            const users: UserDocument[] = await commentService.findAll();
             res.status(200).json(users);
         } catch (error) {
             res.status(500).json(error);
