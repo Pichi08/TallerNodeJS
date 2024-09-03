@@ -1,44 +1,116 @@
-import UserModel, {UserDocument, UserInput} from "../model/user.model";
-import ReactionModel, {ReactionDocument,ReactionInput}  from "../model/reaction.model"
+import UserModel from "../model/user.model";
+import CommentModel from "../model/comment.model";
+import mongoose from "mongoose";
 class ReactionService {
 
 
-    public async createReaction(reactionInput: ReactionInput, userId: string) {
-        //let reaction = reactionInput.reaction;
-        const newReaction = new ReactionModel({
-            reaction: reactionInput.reaction,
-            owner: userId,
-            commentOwner: reactionInput.commentOwner,
-            comment: reactionInput.comment
-        });
+    public async createReaction(reaction:string, commentId: string, userId: string) {
+        const userWithComment = await UserModel.findOne(
+            { "comments._id": commentId }
+        );
+        if(userWithComment){
 
-        const savedReaction = await newReaction.save();
-        return savedReaction;
-    }
+                const newReaction = {
+                    reaction: reaction,
+                    id_owner: userId
+                };
+                const updatedUser = await UserModel.findOneAndUpdate(
+                    {_id: userWithComment._id, "comments._id": commentId},
+                    { $push: { "comments.$.reactions": newReaction } },
+                    { new: true }
+                );
 
-    public async addReactionToComment(userId: string, commentId: string, reactionId: unknown) {
-        /*
-        console.log(`Id del que reacciona en User Service ${userId}`)
-        console.log(`Id del comentario al que se reacciono en User Service ${commentId}`)
-        console.log(`Id de la reaccion  en User Service ${reactionId}`)
-        */
-    
-        try {
-            const user = await UserModel.findOneAndUpdate(
-                { _id: userId, 'comments._id': commentId },
-                { $push: { 'comments.$.reactions': reactionId } }, // Agrega la reacción al array de reacciones del comentario específico
-                { new: true } // Retorna el documento actualizado
-            )
-    
-            console.log('Usuario después de agregar la reacción:', user);
-            return user;
-        } catch (error) {
-            console.error("Error al agregar la reacción:", error);
-            throw error;
+                //console.log(`Usuario reaccionado ${updatedUser}`)
+
+                return updatedUser;
+        }else{
+            const newReaction = {
+                reaction: reaction,
+                id_owner: userId
+            };
+            const updatedUser = await CommentModel.findOneAndUpdate(
+                { _id: commentId },
+                { $push: { reactions: newReaction } },
+                { new: true }
+            );
+
+            return updatedUser;
         }
     }
 
+    public async deleteReaction(reactionId: string, userId: string, commentParentId: string) {
+        // Encuentra el comentario que contiene la reacción
+        const commentWithReaction = await UserModel.findOne(
+            {
+                'comments._id': commentParentId,
+                'comments.reactions._id': reactionId
+            },
+            { 'comments.$': 1 }
+        );
+    
+        if (commentWithReaction) {
+            const deletedReaction = await UserModel.findOneAndUpdate(
+                {
+                    _id: commentWithReaction._id,
+                    'comments._id': commentParentId,
+                    'comments.reactions': {
+                        $elemMatch: {
+                            _id: new mongoose.Types.ObjectId(reactionId),
+                            id_owner: userId 
+                        }
+                    }
+                },
+                {
+                    $pull: {
+                        'comments.$.reactions': {
+                            _id: new mongoose.Types.ObjectId(reactionId),
+                            id_owner: userId 
+                        }
+                    }
+                },
+                { new: true }
+            );
+            
+            if (deletedReaction) {
+                return { success: true, message: "Reacción eliminada correctamente." };
+            } else {
+                return { success: false, message: "No se pudo eliminar la reacción." };
+            }
+    
+        } else {
+            const deletedReaction = await CommentModel.findOneAndUpdate(
+                {
+                    _id: commentParentId,
+                    'reactions': {
+                        $elemMatch: {
+                            _id: new mongoose.Types.ObjectId(reactionId),
+                            id_owner: userId 
+                        }
+                    }
+                },
+                {
+                    $pull: {
+                        'reactions': {
+                            _id: new mongoose.Types.ObjectId(reactionId),
+                            id_owner: userId 
+                        }
+                    }
+                },
+                { new: true }
+            );
 
+            if (deletedReaction) {
+                return { success: true, message: "Reacción eliminada correctamente." };
+            } else {
+                return { success: false, message: "No se pudo eliminar la reacción." };
+            }
+                
+        }
+
+        
+    }
+    
 }
+
 
 export default new ReactionService;

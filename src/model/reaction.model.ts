@@ -2,23 +2,24 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ReactionInput {
     reaction: string; 
-    commentOwner: mongoose.Types.ObjectId; 
-    comment: mongoose.Types.ObjectId; 
-
+    commentId: string;
+    id_owner: string; 
 }
 
-export interface ReactionDocument extends ReactionInput, Document {
+export interface Reaction{
+    reaction: string; 
+    id_owner: string;
+}
+
+export interface ReactionDocument extends ReactionInput, mongoose.Document {
     createdAt: Date,
     updatedAt: Date,
-    owner: mongoose.Types.ObjectId; 
-
 }
 
-const reactionSchema = new Schema<ReactionDocument>({
+export const reactionSchema = new mongoose.Schema({
     reaction: { type: String, required: true }, 
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
-    commentOwner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
-    comment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', required: true }, 
+    id_owner: { type:  String,required: true },
+    commentId: { type: String, required: true }, 
 }, { timestamps: true }); 
 
 const Reaction = mongoose.model<ReactionDocument>("Reaction", reactionSchema);

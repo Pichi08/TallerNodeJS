@@ -14,8 +14,6 @@ class CommentService {
             if (!user) {
                 throw new Error("User not found");
             }
-
-
     
             
             //const commentId = uuidv4();

@@ -6,4 +6,5 @@ export const router = express.Router();
 
 
 router.post("/",auth, reactionController.createReaction)
+router.delete("/",auth,reactionController.deleteReaction)
 
