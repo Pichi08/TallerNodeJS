@@ -9,8 +9,6 @@ import { db } from './config/db';
 
 dotenv.config();
 
-console.log(process.env.DBPASS);
-
 const app: Express = express();
 
 //Para especificar que estamos usando json
@@ -25,8 +23,6 @@ app.get('/', (req: Request, res:Response)=>{
 
 });
 
-//usar las rutas de posts?
-//app.use('/api/posts', router);
 app.use('/api/users', user);
 app.use('/api/reactions', reaction);
 app.use('/api/comments', comment);

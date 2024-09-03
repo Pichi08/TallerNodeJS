@@ -8,6 +8,3 @@ router.post("/reply",auth, commentController.createReply);
 router.delete("/:idComment",auth, commentController.deleteComment);
 router.put("/:idComment",auth, commentController.updateComment);
 router.get("/", auth,commentController.getAll);
-
-
-

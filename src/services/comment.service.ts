@@ -11,25 +11,18 @@ class CommentService {
         try {
             const user = await UserModel.findById(idUser);
     
-            
             if (!user) {
                 throw new Error("User not found");
             }
     
-            
-            //const commentId = uuidv4();
-    
             const newComment = {comment: comment};
-            
-            console.log(`Comentario en User Service ${comment}`)
-            //console.log(`Id en User Service ${newComment.idComment}`)
-            
-    
+                        
             user.comments.push(newComment);
     
-            await user.save();
+            await user.save()
     
             return user;
+
         } catch (error) {
             throw error;
         }
@@ -45,7 +38,6 @@ class CommentService {
         console.log(`Parent en Service ${parentObjectId}`);
 
         const newReply = new CommentModel({
-            //idComment: new Types.ObjectId().toString(),
             comment: comment,
             id_owner: idUser,
             parent: parentObjectId
@@ -57,12 +49,9 @@ class CommentService {
 
 
 
+    /*
     public async addReplyToComment(userId: string, replyContent: string, parentCommentId: string) {
         try {
-            // Crear la respuesta como un nuevo comentario
-            console.log(`UserId en Service ${userId}`);
-            console.log(`reply en Controller ${replyContent}`);
-            console.log(`idComment en Controller ${parentCommentId}`);
             const reply = await CommentModel.create({
                 idComment: new Types.ObjectId().toString(),
                 comment: replyContent,
@@ -88,6 +77,7 @@ class CommentService {
             throw error;
         }
     }
+        */
 
     public async findAll(): Promise<UserDocument[]> {
         try {
@@ -153,61 +143,87 @@ class CommentService {
         }
     }
 
-    //show me all the comments and make an aggregation with the related replies. 
-
   
 
-    public async deleteComment(idUser: string, commentId: string): Promise<UserDocument | null> {
-        try {            
-            const commentOwner = await UserModel.findOne(
-                { 'comments._id': commentId }
-            )
-                        
-            if(commentOwner?._id == idUser){
-                const deleteResult: UserDocument | null = await UserModel.findOneAndUpdate(
-                    { _id: new mongoose.Types.ObjectId(idUser) },
-                    { $pull: { comments: { _id: new mongoose.Types.ObjectId(commentId) } } },
+    public async deleteComment(idUser: string, commentId: string): Promise<UserDocument | null | CommentDocument> {
+        try {
+            // Buscar en la colección de usuarios
+            const commentOwner = await UserModel.findOne({ 'comments._id': commentId });
+            
+            if (commentOwner?._id == idUser) {
+                const updatedUser: UserDocument | null = await UserModel.findOneAndUpdate(
+                    { _id: new mongoose.Types.ObjectId(idUser), 'comments._id': commentId },
+                    { $set: { 'comments.$.comment': "comentario no disponible" } }, // Soft delete
                     { new: true } // Devuelve el documento actualizado
-                  ); 
-                  
-                    return deleteResult;
-            }else{
-                return null;
+                ); 
+    
+                return updatedUser;
+            } else {
+                const reply = await CommentModel.findById(commentId);
+                if(reply?.id_owner == idUser){
+                    const updatedUser: CommentDocument | null = await CommentModel.findByIdAndUpdate(
+                        commentId,
+                        { $set: { comment: "comentario no disponible" } },
+                        { new: true } 
+                    );
+                    
+                    return updatedUser;
+                }
+                return null;              
             }
         } catch (error) {
             throw error;
         }
     }
+    
+    
 
-    public async updateComment(idUser: string, commentId: string, comment: Comment): Promise<UserDocument | null> {
+    public async updateComment(idUser: string, commentId: string, comment: Comment): Promise<UserDocument | null | CommentDocument> {
         try {
             const commentOwner = await UserModel.findOne(
                 { 'comments._id': commentId }
             )
+
             const user = await UserModel.findById(idUser);
             
             if (!user) {
                 throw new Error("User not found");
             }
 
-            if(commentOwner?._id == idUser){
-                const updatedUser = await UserModel.findOneAndUpdate(
-                    {
-                        _id: idUser,
-                        'comments._id': commentId
-                    },
-                    {
-                        $set: { 'comments.$.comment': comment.comment } // Actualiza el texto del comentario
-                    },
-                    {
-                        new: true // Devuelve el documento actualizado
-                    }
-                );
-                  
-                    return updatedUser;
+            if(commentOwner){
+                if(commentOwner?._id == idUser){
+                    const updatedUser = await UserModel.findOneAndUpdate(
+                        {
+                            _id: idUser,
+                            'comments._id': commentId
+                        },
+                        {
+                            $set: { 'comments.$.comment': comment.comment } // Actualiza el texto del comentario
+                        },
+                        {
+                            new: true // Devuelve el documento actualizado
+                        }
+                    );
+                      
+                        return updatedUser;
+                }else{
+                    return null;
+                }
             }else{
+                const reply = await CommentModel.findById(commentId);
+                if(reply?.id_owner == idUser){
+                    const updatedUser: CommentDocument | null = await CommentModel.findByIdAndUpdate(
+                        commentId,
+                        { $set: { comment: comment.comment } },
+                        { new: true } 
+                    );
+                    
+                    return updatedUser;
+                }
                 return null;
             }
+
+        
         } catch (error) {
             throw error;
         }

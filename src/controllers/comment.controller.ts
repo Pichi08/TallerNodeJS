@@ -44,7 +44,7 @@ class commentController {
         
             const idUser = req.params.id;
             const idComment = req.params.idComment;
-            const user: UserDocument | null = await commentService.deleteComment(idUser,idComment);
+            const user: UserDocument | null | CommentDocument = await commentService.deleteComment(idUser,idComment);
             if(!user){
                 res.status(404).json({error: "not found", message: `User with id ${req.params.id} not found`})
             }else{
@@ -60,11 +60,11 @@ class commentController {
             const idUser = req.params.id;
             const idComment = req.params.idComment;
             const comment = req.body as Comment;
-            const user: UserDocument | null = await commentService.updateComment(idUser,idComment,comment);
+            const user: UserDocument | null | CommentDocument = await commentService.updateComment(idUser,idComment,comment);
             if(!user){
-                res.status(404).json({error: "not found", message: `User with id ${req.params.id} not found`})
+                res.status(404).json({ message: "Comment not found or does not belong to the user" })
             }else{
-                res.status(204).json(user);
+                res.status(200).json(user);
             }
         } catch (error) {
             res.status(500).json(error);

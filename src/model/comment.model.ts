@@ -3,8 +3,10 @@ import {reactionSchema,Reaction } from "./reaction.model";  // Importa el esquem
 
 
 export interface Comment {
-    //idComment: string,
     comment: string,
+    reply?: string,
+    id_owner?: string,
+    parent?: string
 
 }
 
@@ -12,6 +14,7 @@ export interface Reply {
     reply: string,
     id_owner: string,
     parent: string,
+    
 }
 
 
@@ -23,12 +26,11 @@ export interface CommentDocument extends Comment, mongoose.Document{
 }
 
 export const commentSchema = new mongoose.Schema({
-    //idComment: { type: String, required: true },
     comment: { type: String, required: true },
-    id_owner: { type: String,required: true},
-    parent: { type: String, required: true},
+    id_owner: { type: String},
+    parent: { type: mongoose.Schema.ObjectId},
     reactions: [reactionSchema]
 });
 
-const Comment = mongoose.model<CommentDocument>("Replies", commentSchema);
+const Comment = mongoose.model<CommentDocument>("Replie",commentSchema);
 export default Comment;
