@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import reactionService from "../services/reaction.service"
-import { error } from "console";
-
 
 class reactionController {
 

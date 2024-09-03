@@ -1,10 +1,6 @@
 import UserModel, {UserDocument} from "../model/user.model";
-import CommentModel, {Comment, CommentDocument,Reply } from "../model/comment.model";
-import { v4 as uuidv4 } from 'uuid';
-import mongoose, { Types } from "mongoose";
-import { error } from "console";
-//import { Select } from "@mui/material";
-
+import CommentModel, {Comment, CommentDocument} from "../model/comment.model";
+import mongoose from "mongoose";
 class CommentService {
     
     public async createComment(idUser: string, comment: string): Promise<UserDocument> {
@@ -35,7 +31,6 @@ class CommentService {
         }
 
         const parentObjectId = new mongoose.Types.ObjectId(parent);
-        console.log(`Parent en Service ${parentObjectId}`);
 
         const newReply = new CommentModel({
             comment: comment,
@@ -48,40 +43,8 @@ class CommentService {
     }
 
 
-
-    /*
-    public async addReplyToComment(userId: string, replyContent: string, parentCommentId: string) {
-        try {
-            const reply = await CommentModel.create({
-                idComment: new Types.ObjectId().toString(),
-                comment: replyContent,
-                reactions: [],
-                replies: []
-            });
-    
-            const comment = await UserModel.findOne(
-                { _id: userId, 'comments.idComment': parentCommentId }
-            );
-            console.log('Comentario encontrado:', comment);
-            // Agregar el ObjectId de la respuesta al array de 'replies' del comentario padre
-            const user = await UserModel.findOneAndUpdate(
-                { _id: userId, 'comments._id': parentCommentId },
-                { $push: { 'comments.$.replies': reply._id } },
-                { new: true }
-            );
-    
-            console.log('Usuario después de agregar la respuesta:', user);
-            return user;
-        } catch (error) {
-            console.error("Error al agregar la respuesta:", error);
-            throw error;
-        }
-    }
-        */
-
     public async findAll(): Promise<UserDocument[]> {
         try {
-            // Fetch all users along with their comments
             const users = await UserModel.aggregate([
                 { $unwind: '$comments' },
                 {
@@ -147,14 +110,13 @@ class CommentService {
 
     public async deleteComment(idUser: string, commentId: string): Promise<UserDocument | null | CommentDocument> {
         try {
-            // Buscar en la colección de usuarios
             const commentOwner = await UserModel.findOne({ 'comments._id': commentId });
             
             if (commentOwner?._id == idUser) {
                 const updatedUser: UserDocument | null = await UserModel.findOneAndUpdate(
                     { _id: new mongoose.Types.ObjectId(idUser), 'comments._id': commentId },
-                    { $set: { 'comments.$.comment': "comentario no disponible" } }, // Soft delete
-                    { new: true } // Devuelve el documento actualizado
+                    { $set: { 'comments.$.comment': "comentario no disponible" } },
+                    { new: true } 
                 ); 
     
                 return updatedUser;
@@ -198,10 +160,10 @@ class CommentService {
                             'comments._id': commentId
                         },
                         {
-                            $set: { 'comments.$.comment': comment.comment } // Actualiza el texto del comentario
+                            $set: { 'comments.$.comment': comment.comment }
                         },
                         {
-                            new: true // Devuelve el documento actualizado
+                            new: true 
                         }
                     );
                       
@@ -228,9 +190,7 @@ class CommentService {
             throw error;
         }
     }
-    
-    
-    
+     
 }
 
 export default new CommentService;

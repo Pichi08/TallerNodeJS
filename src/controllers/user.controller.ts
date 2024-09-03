@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { UserDocument, UserInput} from "../model/user.model"
-import { Comment } from "../model/comment.model";
 import userService from "../services/user.service"
 
 

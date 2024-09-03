@@ -6,7 +6,6 @@ import UserModel, {UserDocument, UserInput} from "../model/user.model";
 class UserService {
 
     public async createUser(userInput: UserInput): Promise<UserDocument> {
-
         try {
             const userExists: UserDocument | null = await this.findByEmail(userInput.email)
             if (userExists)
@@ -22,7 +21,6 @@ class UserService {
     
     
     public async login(userInput: UserInput) {
-
         try {
             const userExists: UserDocument | null = await this.findByEmail(userInput.email)
             if (!userExists)
@@ -36,14 +34,12 @@ class UserService {
         } catch (error) {
             throw error;
         }
-
     }
 
     
     public async update(id: string, userInput: UserInput): Promise<UserDocument | null> {
         try {
             if (userInput.password) {
-                // Encripta la nueva contraseña antes de actualizar
                 userInput.password = await bycrypt.hash(userInput.password, 10);
             }
             const user: UserDocument | null = await UserModel.findOneAndUpdate({_id: id}, userInput, {returnOriginal: false});
@@ -64,35 +60,29 @@ class UserService {
 
 
     public async findAll(): Promise<UserDocument[]> {
-
         try {
             const user = await UserModel.find();
             return user;
         } catch (error) {
             throw error;
         }
-
     }
 
     public async findByEmail(email: string): Promise<UserDocument | null> {
-
         try {
             const user = await UserModel.findOne({email});
             return user;
         } catch (error) {
             throw error;
         }
-
     }
 
     public generateToker(user: UserDocument): string{
-
         try{
             return jwt.sign({id: user._id, email: user.email, name:user.name, rol: user.rol}, process.env.JWT_SECRET || "secret", {expiresIn: "100m"});
         }catch(error){
             throw error;
         }
-
     }
 
     

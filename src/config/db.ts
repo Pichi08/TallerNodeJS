@@ -7,7 +7,7 @@ const connectionString = process.env.MONGO_URL || "mongodb://localhot:21017/node
 
 export const db = mongoose.connect(connectionString)
                     .then(
-                        () => console.log("Connected to MongoDB. VUAMOS")
+                        () => console.log("Connected to MongoDB")
                     ).catch(
                         (err) => console.log(err)
                     );

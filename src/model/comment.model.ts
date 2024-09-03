@@ -1,5 +1,5 @@
-import mongoose, { Schema } from "mongoose";
-import {reactionSchema,Reaction } from "./reaction.model";  // Importa el esquema de comentarios
+import mongoose from "mongoose";
+import {reactionSchema,Reaction } from "./reaction.model";
 
 
 export interface Comment {

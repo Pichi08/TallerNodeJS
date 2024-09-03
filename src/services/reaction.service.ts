@@ -20,8 +20,6 @@ class ReactionService {
                     { new: true }
                 );
 
-                //console.log(`Usuario reaccionado ${updatedUser}`)
-
                 return updatedUser;
         }else{
             const newReaction = {
@@ -39,7 +37,6 @@ class ReactionService {
     }
 
     public async deleteReaction(reactionId: string, userId: string, commentParentId: string) {
-        // Encuentra el comentario que contiene la reacción
         const commentWithReaction = await UserModel.findOne(
             {
                 'comments._id': commentParentId,
@@ -106,11 +103,8 @@ class ReactionService {
             }
                 
         }
-
-        
     }
     
 }
-
 
 export default new ReactionService;

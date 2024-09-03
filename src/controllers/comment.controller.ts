@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { UserDocument, UserInput} from "../model/user.model"
-import { Comment,CommentDocument, Reply } from "../model/comment.model";
+import { UserDocument} from "../model/user.model"
+import { Comment,CommentDocument } from "../model/comment.model";
 import commentService from "../services/comment.service"
 
 
@@ -11,10 +11,6 @@ class commentController {
         try {
             const idUser = req.params.id;
             const comment = req.body as Comment;
-            /*
-            console.log(`Comentario en User Controler ${comment.comment}`)
-            console.log(`Usuario en User Controler ${idUser}`)
-            */
             const user: UserDocument = await commentService.createComment(idUser,comment.comment);
             res.status(201).json(user);
         } catch (error) {
@@ -24,12 +20,8 @@ class commentController {
 
     public async createReply(req: Request, res: Response) {
         try {
-            const replier = req.params.id;  // ID del usuario
+            const replier = req.params.id; 
             const { comment, parent } = req.body;
-
-            //console.log(`UserId en Controller ${commentOwner}`);
-            //console.log(`reply en Controller ${reply}`);
-            //console.log(`idComment en Controller ${idComment}`);
 
             const replyCreated: CommentDocument = await commentService.createReply(replier, comment,parent);
 
