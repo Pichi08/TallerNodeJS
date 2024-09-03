@@ -3,6 +3,7 @@ import CommentModel, {Comment, CommentDocument,Reply } from "../model/comment.mo
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { Types } from "mongoose";
 import { error } from "console";
+//import { Select } from "@mui/material";
 
 class CommentService {
     
@@ -40,11 +41,14 @@ class CommentService {
             throw new Error("User not found");
         }
 
+        const parentObjectId = new mongoose.Types.ObjectId(parent);
+        console.log(`Parent en Service ${parentObjectId}`);
+
         const newReply = new CommentModel({
             //idComment: new Types.ObjectId().toString(),
             comment: comment,
             id_owner: idUser,
-            parent: parent
+            parent: parentObjectId
         });
         
         const savedReply = await newReply.save();
@@ -85,54 +89,73 @@ class CommentService {
         }
     }
 
-
-public async findAll(): Promise<UserDocument[]> {
-    try {
-        const users = await UserModel.find()
-            .populate({
-                path: 'comments',
-                populate: [
-                    {
-                        path: 'reactions', 
-                        populate: {
-                            path: 'owner',
-                            select: 'name'
-                        }
+    public async findAll(): Promise<UserDocument[]> {
+        try {
+            // Fetch all users along with their comments
+            const users = await UserModel.aggregate([
+                { $unwind: '$comments' },
+                {
+                  $lookup: {
+                    from: 'replies',
+                    localField: 'comments._id',
+                    foreignField: 'parent',
+                    as: 'comments.replies'
+                  }
+                },
+                {
+                  $unwind: {
+                    path: '$comments.replies',
+                    preserveNullAndEmptyArrays: true
+                  }
+                },
+                {
+                  $lookup: {
+                    from: 'replies',
+                    localField: 'comments.replies._id',
+                    foreignField: 'parent',
+                    as: 'comments.replies.nested_replies'
+                  }
+                },
+                {
+                  $group: {
+                    _id: {
+                      user_id: '$_id',
+                      comment_id: '$comments._id'
                     },
-                    {
-                        path: 'replies', // Agrega aquí el campo 'replies'
-                        populate: [
-                            {
-                                path: 'reactions', 
-                                populate: {
-                                    path: 'owner',
-                                    select: 'name'
-                                }
-                            },
-                            {
-                                path: 'replies', // Si las respuestas también pueden tener respuestas anidadas
-                                populate: {
-                                    path: 'reactions',
-                                    populate: {
-                                        path: 'owner',
-                                        select: 'name'
-                                    }
-                                }
-                            }
-                        ]
+                    comment: { $first: '$comments.comment' },
+                    reactions: { $first: '$comments.reactions' },
+                    replies: { $push: '$comments.replies' }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    user_id: '$_id.user_id',
+                    comment_id: '$_id.comment_id',
+                    comment: 1,
+                    reactions: 1,
+                    replies: {
+                      $cond: {
+                        if: { $eq: [{ $arrayElemAt: ['$replies._id', 0] }, null] },
+                        then: [],
+                        else: '$replies'
+                      }
                     }
-                ]
-            });
+                  }
+                }
+              ], { maxTimeMS: 60000, allowDiskUse: true });
+              
 
-        return users;
-    } catch (error) {
-        console.error("Error al obtener usuarios y comentarios:", error);
-        throw error;
+            return users; 
+        } catch (error) {
+            console.error("Error while fetching users and their comments:", error);
+            throw error;
+        }
     }
-}
 
+    //show me all the comments and make an aggregation with the related replies. 
 
-    
+  
 
     public async deleteComment(idUser: string, commentId: string): Promise<UserDocument | null> {
         try {            
@@ -185,27 +208,6 @@ public async findAll(): Promise<UserDocument[]> {
             }else{
                 return null;
             }
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    public async getAll(): Promise<UserDocument[]> {
-        try {
-            const users = await UserModel.find()
-                .populate({
-                    path: 'comments',
-                    populate: [
-                        {
-                            path: 'replies',
-                            populate: { path: 'reactions' }  // Si las respuestas también tienen reacciones
-                        },
-                        {
-                            path: 'reactions'  // Para popular directamente las reacciones del comentario
-                        }
-                    ]
-                });
-            return users;
         } catch (error) {
             throw error;
         }
