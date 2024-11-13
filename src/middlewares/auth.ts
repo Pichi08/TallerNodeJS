@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 // Definición del middleware de autenticación.
 export const auth = (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
         // Llama a la siguiente función si la verificación fue exitosa.
         next();
     } catch (error) {
-        if (error instanceof TokenExpiredError) {
+        if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({ message: "Token expired" });
         }
         res.status(401).json({ message: "Unauthorized" });

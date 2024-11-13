@@ -5,7 +5,7 @@ export const resolvers = {
     Query: {
         user: async (_root: any, params: any) => {
             console.log(params.id);
-            const user: UserDocument | null = await userService.findByEmail(params.id);
+            const user: UserDocument | null = await userService.findById(params.id);
             return user;
         }, 
         users: (_root: any) => userService.findAll(),

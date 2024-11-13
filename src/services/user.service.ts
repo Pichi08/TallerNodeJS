@@ -95,6 +95,17 @@ class UserService {
         }
     }
 
+    // Método para encontrar un usuario por su ID
+    public async findById(id: string): Promise<UserDocument | null> {
+        try {
+            // Buscar y devolver el usuario por su ID
+            const user = await UserModel.findById(id);
+            return user;
+        } catch (error) {
+            throw error; // Lanzar error en caso de fallo
+        }
+    }
+
     // Método para generar un token JWT para un usuario
     public generateToken(user: UserDocument): string {
         try {
