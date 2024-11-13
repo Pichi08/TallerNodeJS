@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import UserModel, { UserDocument, UserInput } from "../model/user.model";
+import UserModel, { UserDocument, UserInput, LoginInput } from "../model/user.model";
 
 class UserService {
 
@@ -25,16 +25,16 @@ class UserService {
     }
 
     // Método para iniciar sesión de un usuario
-    public async login(userInput: UserInput) {
+    public async login(loginInput: LoginInput) {
         try {
             // Verificar si el usuario existe
-            const userExists: UserDocument | null = await this.findByEmail(userInput.email);
+            const userExists: UserDocument | null = await this.findByEmail(loginInput.email);
             if (!userExists) {
                 throw new ReferenceError("User doesn't exist");
             }
 
             // Comparar la contraseña proporcionada con la encriptada
-            const isMatch: boolean = await bcrypt.compare(userInput.password, userExists.password);
+            const isMatch: boolean = await bcrypt.compare(loginInput.password, userExists.password);
             if (!isMatch) {
                 throw new ReferenceError("User or password incorrect");
             }

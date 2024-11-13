@@ -1,6 +1,8 @@
 type Query {
     user(id: ID!): User
     users: [User]
+    userSearchByEmail(email: String!): User
+    comments: [Comment]
 }
 
 type User {
@@ -10,10 +12,23 @@ type User {
     password: String
 }
 
+type Comment {
+    id: ID!
+    comment: String
+    user: User
+}
+
+type UserLogged{
+    email: String
+    token: String
+}
+
 type Mutation {
     createUser(input: CreateUserInput!): User
     updateUser(input: UpdateUserInput!): User
     deleteUser(input: DeleteUserInput!): User
+    loginUser(input: LoginUserInput!): UserLogged
+    createComment(input: CreateCommentInput!): [Comment]
 }
 
 
@@ -32,4 +47,14 @@ input UpdateUserInput{
 
 input DeleteUserInput{
     id: ID!
+}
+
+input LoginUserInput{
+    email: String!
+    password: String!
+}
+
+input CreateCommentInput{
+    comment: String!
+    user: ID!
 }

@@ -10,6 +10,11 @@ export interface UserInput {
     rol: string;      // Rol del usuario
 }
 
+export interface LoginInput{
+    email: string,
+    password: string
+}
+
 // Interfaz que extiende UserInput y añade propiedades de documento de Mongoose
 export interface UserDocument extends UserInput, mongoose.Document {
     createdAt: Date,
