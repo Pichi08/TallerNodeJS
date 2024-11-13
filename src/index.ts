@@ -24,7 +24,7 @@ app.use(cors())
 
 const port = process.env.PORT; 
 
-let typeDefs = await readFile("./src/graphql/users/schema.graphql", 'utf-8'); 
+let typeDefs = await readFile("./graphql/users/schema.graphql", 'utf-8'); 
 
 const apolloServer  =  new ApolloServer({typeDefs, resolvers}); 
 await apolloServer.start();
