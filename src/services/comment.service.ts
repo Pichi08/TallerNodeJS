@@ -1,5 +1,5 @@
-import UserModel, { UserDocument } from "../model/user.model";
-import CommentModel, { Comment, CommentDocument } from "../model/comment.model";
+import UserModel, { UserDocument } from "../model/user.model.js";
+import CommentModel, { Comment, CommentDocument } from "../model/comment.model.js";
 import mongoose from "mongoose";
 
 class CommentService {
@@ -113,7 +113,6 @@ class CommentService {
                   }
                 }
               ], { maxTimeMS: 60000, allowDiskUse: true });
-              
             return users; // Retornar la lista de usuarios con comentarios y respuestas
         } catch (error) {
             console.error("Error while fetching users and their comments:", error);
@@ -158,11 +157,14 @@ class CommentService {
     
     // Método para actualizar un comentario o respuesta
     public async updateComment(idUser: string, commentId: string, comment: Comment): Promise<UserDocument | null | CommentDocument> {
+        //console.log("Updating comment:", comment.comment);
         try {
             // Buscar el propietario del comentario
             const commentOwner = await UserModel.findOne(
                 { 'comments._id': commentId }
             )
+
+            //console.log("Comment owner:", commentOwner);
 
             // Buscar al usuario que realiza la actualización
             const user = await UserModel.findById(idUser);
@@ -180,12 +182,14 @@ class CommentService {
                             'comments._id': commentId
                         },
                         {
-                            $set: { 'comments.$.comment': comment.comment }
+                            $set: { 'comments.$.comment': comment }
                         },
                         {
                             new: true 
                         }
                     );
+
+                    //console.log("Updated user:", updatedUser);
                       
                     return updatedUser; // Retornar el documento del usuario actualizado
                 } else {
@@ -210,6 +214,7 @@ class CommentService {
             throw error; // Lanzar error si ocurre alguna excepción
         }
     }
+
      
 }
 

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 // Importamos el esquema de reacción y la interfaz Reaction del archivo reaction.model
-import {reactionSchema, Reaction } from "./reaction.model";
+import {reactionSchema, Reaction } from "./reaction.model.js";
 
 // Definimos una interfaz para la estructura básica de un comentario
 export interface Comment {

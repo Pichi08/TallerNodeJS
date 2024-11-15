@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import UserModel, { UserDocument, UserInput, LoginInput } from "../model/user.model";
+import UserModel, { UserDocument, UserInput, LoginInput } from "../model/user.model.js";
 
 class UserService {
 

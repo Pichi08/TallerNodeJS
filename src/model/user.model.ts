@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 // Importamos el esquema de comentarios y la interfaz Comment del archivo comment.model
-import { commentSchema, Comment } from "./comment.model";
+import { commentSchema, Comment } from "./comment.model.js";
 
 // Definimos una interfaz para los datos de entrada de un usuario
 export interface UserInput {

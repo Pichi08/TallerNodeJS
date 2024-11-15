@@ -1,5 +1,5 @@
-import UserModel from "../model/user.model";
-import CommentModel from "../model/comment.model";
+import UserModel from "../model/user.model.js";
+import CommentModel from "../model/comment.model.js";
 import mongoose from "mongoose";
 
 class ReactionService {
