@@ -4,12 +4,13 @@ import jwt from 'jsonwebtoken';
 import { ApolloServer } from '@apollo/server';
 import {expressMiddleware as apolloMiddleware} from '@apollo/server/express4' 
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'fs';
 import { resolvers } from "./graphql/resolvers.js";
 import cors from 'cors';
 
 //import { router as comment } from './routes/comment';
 //import { router as user } from './routes/user';
-//simport { router as reaction } from './routes/reaction'; 
+//import { router as reaction } from './routes/reaction'; 
 import { db } from './config/db.js'; 
 
 dotenv.config(); // Cargar las variables de entorno desde el archivo .env
@@ -24,7 +25,7 @@ app.use(cors())
 
 const port = process.env.PORT; 
 
-let typeDefs = await readFile("./src/graphql/schema.graphql", 'utf-8'); 
+let typeDefs = await readFileSync('./schema.graphql', { encoding: 'utf-8' }); 
 
 const apolloServer  =  new ApolloServer({typeDefs, resolvers, 
     
