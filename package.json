@@ -6,9 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postbuild": "copyfiles -u 1 src/**/*.graphql dist/"
+    "build": "tsc && copyfiles -u 1 src/**/*.graphql dist/",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "escobar,ossa",
   "license": "ISC",
