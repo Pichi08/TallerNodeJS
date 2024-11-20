@@ -6,8 +6,8 @@ type Query {
 }
 
 type Reaction {
-  type: String
-  count: Int
+  reaction: String
+  idOwner: String
 }
 
 type Reply {
