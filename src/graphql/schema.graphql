@@ -5,27 +5,41 @@ type Query {
     comments: [Comment]
 }
 
+type Reaction {
+  type: String
+  count: Int
+}
+
+type Reply {
+  _id: ID!
+  comment: String
+  reactions: [Reaction]
+  nested_replies: [Reply]
+}
+
+type Comment {
+  _id: ID!
+  comment: String
+  reactions: [Reaction]
+  replies: [Reply]
+  user_id: ID!
+}
+
 type User {
     id: ID!
     name: String
     email: String
     password: String
-    rol:String
+    rol: String
+    comments: [Comment]
 }
 
-type Comment {
-  id: ID!
-  comment: String
-  user: User
-  reactions: [Reaction]
-  replies: [Comment] 
-}
 
-type Reaction {
-  id: ID!
-  reaction: String
-  user: User
-}
+#type Reaction {
+#  id: ID!
+#  reaction: String
+#  user: User
+#}
 
 type UserLogged{
     email: String

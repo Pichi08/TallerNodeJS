@@ -34,7 +34,11 @@ export const resolvers = {
             }
             return user;
         },
-        comments: async (_root: any) => commentService.findAll(),
+        comments: async (_root: any) => {
+            const users: UserDocument[] = await commentService.findAll();
+            console.log(users);
+            return users;
+        }
 
     },
     Mutation: {
