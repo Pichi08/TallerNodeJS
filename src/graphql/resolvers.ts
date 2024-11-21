@@ -96,7 +96,7 @@ export const resolvers = {
                 return {"comment": 'Comment with ID ' + replyOutput.id + ' updated successfully'};
             }
 
-            return commentOutput.comments;
+            return {"comments": commentOutput.comments};
         },
         deleteComment: async (_root: any, params: any, context: any) => {
             const commentOutput: UserDocument | CommentDocument | null = await commentService.deleteComment(context.user.id, params.input.idComment);
