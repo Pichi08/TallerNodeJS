@@ -61,6 +61,7 @@ type Comment {
   user_id: ID!
 }
 
+
 type CommentDTO {
     _id: ID!
     comment: String
@@ -77,11 +78,10 @@ type User {
 }
 
 
-#type Reaction {
-#  id: ID!
-#  reaction: String
-#  user: User
-#}
+type UpdateCommentResponse {
+    comment: String
+    comments: [CommentDTO]
+}
 
 type UserLogged{
     email: String
@@ -94,8 +94,8 @@ type Mutation {
     deleteUser(input: DeleteUserInput!): User
     loginUser(input: LoginUserInput!): UserLogged
     createComment(input: CreateCommentInput!): [CommentDTO]
-    updateComment(input: UpdateCommentInput!): [CommentDTO]
-    deleteComment(input: DeleteCommentInput!): [CommentDTO]
+    updateComment(input: UpdateCommentInput!): UpdateCommentResponse
+    deleteComment(input: DeleteCommentInput!): String
     answerComment(input: AnswerCommentInput!): CommentDetailResultDTO
     createReaction(input: CreateReactioninput!): CommentDetailResultDTO
     deleteReaction(input: DeleteReactionInput!): CommentDetailResultDTO

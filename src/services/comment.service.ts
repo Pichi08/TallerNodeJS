@@ -295,7 +295,7 @@ class CommentService {
                 const reply = await CommentModel.findById(commentId);
                 if (reply?.id_owner == idUser) {
                     // Si la respuesta pertenece al usuario, actualizarla para marcarla como "no disponible"
-                    const updatedUser: CommentDocument | null = await CommentModel.findByIdAndUpdate(
+                    const updatedUser = await CommentModel.findByIdAndUpdate(
                         commentId,
                         { $set: { comment: "comentario no disponible" } },
                         { new: true } 
@@ -311,7 +311,7 @@ class CommentService {
     }
     
     // Método para actualizar un comentario o respuesta
-    public async updateComment(idUser: string, commentId: string, comment: Comment): Promise<UserDocument | null | CommentDocument> {
+    public async updateCommentInMyDocument(idUser: string, commentId: string, comment: Comment): Promise<UserDocument | null> {
         //console.log("Updating comment:", comment.comment);
         try {
             // Buscar el propietario del comentario
@@ -347,28 +347,34 @@ class CommentService {
                     console.log("Updated user:", updatedUser);
                     
                     return updatedUser; // Retornar el documento del usuario actualizado
-                } else {
-                    return null; // Retornar null si el comentario no pertenece al usuario
+                } 
+                else {
+                    throw new Error("Comment does not belong to user"); // Lanza un error si el comentario no pertenece al usuario
                 }
-            } else {
-                // Buscar la respuesta en la colección de comentarios
-                const reply = await CommentModel.findById(commentId);
-                if (reply?.id_owner == idUser) {
-                    // Si la respuesta pertenece al usuario, actualizarla
-                    const updatedUser: CommentDocument | null = await CommentModel.findByIdAndUpdate(
-                        commentId,
-                        { $set: { comment: comment.comment } },
-                        { new: true } 
-                    );
-                    
-                    return updatedUser; // Retornar el documento de la respuesta actualizada
-                }
-                return null; // Retornar null si la respuesta no pertenece al usuario
-            }
+            } 
+            return null; // Retornar null si no se encontró el comentario
         } catch (error) {
             throw error; // Lanzar error si ocurre alguna excepción
         }
     }
+
+    // Método para actualizar un comentario o respuesta
+    public async updateCommentInReplies(idUser: string,commentId: string,comment: Comment): Promise<CommentDocument | null> {
+      const reply = await CommentModel.findById(commentId);
+  
+      if (reply && reply?.id_owner === idUser) {
+          const updatedReply: CommentDocument | null = await CommentModel.findOneAndUpdate(
+              { _id: commentId },
+              { $set: { comment: comment } },
+              { new: true }
+          )
+
+  
+          return updatedReply; // Retornar el documento de la respuesta actualizada
+      }
+  
+      return null; // Retornar null si la respuesta no pertenece al usuario
+  }
 
      
 }

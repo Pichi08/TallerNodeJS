@@ -85,10 +85,17 @@ export const resolvers = {
         },
         updateComment: async (_root: any, params: any, context: any) => {
             const comment = params.input.comment as Comment;
-            const commentOutput: UserDocument | null | CommentDocument = await commentService.updateComment(context.user.id, params.input.idComment, comment);
+            const commentOutput: UserDocument | null = await commentService.updateCommentInMyDocument(context.user.id, params.input.idComment, comment);
             if(!commentOutput){
-                throw forbiddenError('You do not have permission to update this comment');
+                const replyOutput: CommentDocument | null = await commentService.updateCommentInReplies(context.user.id,params.input.idComment,comment);
+
+                if (!replyOutput) {
+                    throw notFoundError('Comment not found');
+                }
+
+                return {"comment": 'Comment with ID ' + replyOutput.id + ' updated successfully'};
             }
+
             return commentOutput.comments;
         },
         deleteComment: async (_root: any, params: any, context: any) => {
@@ -96,7 +103,7 @@ export const resolvers = {
             if(!commentOutput){
                 throw forbiddenError('You do not have permission to delete this comment');
             }
-            return commentOutput.comments;
+            return 'Comment deleted successfully';
         },
         answerComment: async (_root: any, params: any, context:any) => {
             const commentOutput: UserDocument | CommentDocument | null = await commentService.createReply(context.user.id, params.input.comment, params.input.parent);
@@ -111,11 +118,11 @@ export const resolvers = {
             return comment;
         },
         createReaction: async (_root: any, params: any, context: any) => {
-            const reactionOutput: UserDocument | CommentDocument | null = await reactionService.createReaction(params.input.reaction, params.input.commentId, context.user.id);
+            const reactionOutput = await reactionService.createReaction(params.input.reaction, params.input.commentId, context.user.id);
             if(!reactionOutput){
                 throw notFoundError('Comment not found');
             }
-            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(reactionOutput._id.toString());
+            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(params.input.commentId);
             console.log(comment);
             
             // console.log(reactionOutput);

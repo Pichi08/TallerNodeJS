@@ -6,36 +6,13 @@ class ReactionService {
 
     // Método para crear una reacción en un comentario
     public async createReaction(reaction: string, commentId: string, userId: string) {
-        try {
-            // Primero, verificar si la reacción ya existe
-            const existingReaction = await UserModel.findOne(
-                { 
-                    "comments._id": commentId, 
-                    "comments.reactions": { 
-                        $elemMatch: { 
-                            reaction: reaction, 
-                            id_owner: userId 
-                        } 
-                    }
-                }
-            );
-    
-            if (existingReaction) {
-                // Si la reacción ya existe, devolver solo el ID y comentario
-                const existingComment = existingReaction.comments.find(
-                    comment => comment._id.toString() === commentId
-                );
-                
-                return {
-                    _id: existingComment._id,
-                    comment: existingComment.comment
-                };
-            }
-    
+        try {    
             // Buscar al usuario que tiene el comentario
             const userWithComment = await UserModel.findOne(
                 { "comments._id": commentId }
             );
+
+            console.log(userWithComment);
     
             if (userWithComment) {
                 // Crear una nueva reacción
@@ -43,6 +20,8 @@ class ReactionService {
                     reaction: reaction,
                     id_owner: userId
                 };
+
+                console.log(newReaction);
     
                 // Agregar la reacción al comentario del usuario
                 const updatedUser = await UserModel.findOneAndUpdate(
@@ -50,16 +29,8 @@ class ReactionService {
                     { $push: { "comments.$.reactions": newReaction } },
                     { new: true }
                 );
-    
-                // Encontrar el comentario específico
-                const updatedComment = updatedUser.comments.find(
-                    comment => comment._id.toString() === commentId
-                );
-    
-                return {
-                    _id: updatedComment._id,
-                    comment: updatedComment.comment
-                };
+                return updatedUser;
+
             } else {
                 // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
                 const newReaction = {
@@ -74,10 +45,14 @@ class ReactionService {
                     { new: true }
                 );
     
-                return {
-                    _id: updatedComment._id,
-                    comment: updatedComment.comment
-                };
+                if (updatedComment) {
+                    return {
+                        _id: updatedComment._id,
+                        comment: updatedComment.comment
+                    };
+                } else {
+                    throw new Error('Comment not found');
+                }
             }
         } catch (error) {
             console.error('Error al crear reacción:', error);
