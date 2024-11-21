@@ -16,17 +16,17 @@ class CommentService {
     
             // Crear un nuevo comentario
             const newComment = { comment: comment };
-                        
             // Agregar el comentario al array de comentarios del usuario
             user.comments.push(newComment);
     
             // Guardar el usuario actualizado
-            await user.save();
+            const userSave = await user.save();
     
             return user; // Retornar el documento del usuario actualizado
 
         } catch (error) {
-            throw error; 
+            
+            throw "No guarda el usuario: " + error; 
         }
     }
 
@@ -189,8 +189,8 @@ class CommentService {
                         }
                     );
 
-                    //console.log("Updated user:", updatedUser);
-                      
+                    console.log("Updated user:", updatedUser);
+                    
                     return updatedUser; // Retornar el documento del usuario actualizado
                 } else {
                     return null; // Retornar null si el comentario no pertenece al usuario

@@ -25,6 +25,12 @@ type Comment {
   user_id: ID!
 }
 
+type CommentDTO {
+    _id: ID!
+    comment: String
+    user: User
+}
+
 type User {
     id: ID!
     name: String
@@ -51,9 +57,9 @@ type Mutation {
     updateUser(input: UpdateUserInput!): User
     deleteUser(input: DeleteUserInput!): User
     loginUser(input: LoginUserInput!): UserLogged
-    createComment(input: CreateCommentInput!): [Comment]
-    updateComment(input: UpdateCommentInput!): Comment
-    deleteComment(input: DeleteCommentInput!): Comment
+    createComment(input: CreateCommentInput!): [CommentDTO]
+    updateComment(input: UpdateCommentInput!): [CommentDTO]
+    deleteComment(input: DeleteCommentInput!): [CommentDTO]
     answerComment(input: AnswerCommentInput!): Comment
     createReaction(input: CreateReactioninput!): Comment
     deleteReaction(input: DeleteReactionInput!): Comment

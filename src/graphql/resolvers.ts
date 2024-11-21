@@ -81,20 +81,21 @@ export const resolvers = {
             if(!commentOutput){
                 throw forbiddenError('You do not have permission to update this comment');
             }
-            return commentOutput;
+            return commentOutput.comments;
         },
         deleteComment: async (_root: any, params: any, context: any) => {
             const commentOutput: UserDocument | CommentDocument | null = await commentService.deleteComment(context.user.id, params.input.idComment);
             if(!commentOutput){
                 throw forbiddenError('You do not have permission to delete this comment');
             }
-            return commentOutput;
+            return commentOutput.comments;
         },
         answerComment: async (_root: any, params: any, context:any) => {
             const commentOutput: UserDocument | CommentDocument | null = await commentService.createReply(context.user.id, params.input.comment, params.input.parent);
             if(!commentOutput){
                 throw notFoundError('Parent comment not found');
             }
+            console.log(commentOutput);
             return commentOutput;
         },
         createReaction: async (_root: any, params: any, context: any) => {
@@ -102,6 +103,7 @@ export const resolvers = {
             if(!reactionOutput){
                 throw notFoundError('Comment not found');
             }
+            console.log(reactionOutput);
             return reactionOutput;
         },
         deleteReaction: async (_root: any, params: any,context: any) => {

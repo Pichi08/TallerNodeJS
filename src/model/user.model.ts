@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },  // Nombre del usuario, obligatorio
     email: { type: String, required: true, index: true, unique: true },  // Email, obligatorio, indexado y único
     password: { type: String, required: true },  // Contraseña, obligatoria
-    rol: {type: String, default: 'user', required: true, enum: ['superadmin','user']},  // Rol, obligatorio, con valores permitidos
+    rol: {type: String, default: 'user', required: true, enum: ['admin','user']},  // Rol, obligatorio, con valores permitidos
     comments: [commentSchema]  // Array de comentarios, usando el esquema importado
 }, { timestamps: true, collection: "users" });
 

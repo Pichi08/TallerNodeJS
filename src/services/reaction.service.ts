@@ -6,41 +6,64 @@ class ReactionService {
 
     // Método para crear una reacción en un comentario
     public async createReaction(reaction: string, commentId: string, userId: string) {
-        // Buscar al usuario que tiene el comentario
-        const userWithComment = await UserModel.findOne(
-            { "comments._id": commentId }
-        );
-
-        if (userWithComment) {
-            // Crear una nueva reacción
-            const newReaction = {
-                reaction: reaction,
-                id_owner: userId
-            };
-
-            // Agregar la reacción al comentario del usuario
-            const updatedUser = await UserModel.findOneAndUpdate(
-                { _id: userWithComment._id, "comments._id": commentId },
-                { $push: { "comments.$.reactions": newReaction } },
-                { new: true } // Retornar el documento actualizado
+        try {
+            // Primero, verificar si la reacción ya existe
+            const existingReaction = await UserModel.findOne(
+                { 
+                    "comments._id": commentId, 
+                    "comments.reactions": { 
+                        $elemMatch: { 
+                            reaction: reaction, 
+                            id_owner: userId 
+                        } 
+                    }
+                }
             );
-
-            return updatedUser;
-        } else {
-            // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
-            const newReaction = {
-                reaction: reaction,
-                id_owner: userId
-            };
-
-            // Agregar la reacción al comentario en la colección de comentarios
-            const updatedComment = await CommentModel.findOneAndUpdate(
-                { _id: commentId },
-                { $push: { reactions: newReaction } },
-                { new: true } // Retornar el documento actualizado
+    
+            if (existingReaction) {
+                // La reacción ya existe, no hacer nada o manejar según tu lógica de negocio
+                return existingReaction;
+            }
+    
+            // Buscar al usuario que tiene el comentario
+            const userWithComment = await UserModel.findOne(
+                { "comments._id": commentId }
             );
-
-            return updatedComment;
+    
+            if (userWithComment) {
+                // Crear una nueva reacción
+                const newReaction = {
+                    reaction: reaction,
+                    id_owner: userId
+                };
+    
+                // Agregar la reacción al comentario del usuario
+                const updatedUser = await UserModel.findOneAndUpdate(
+                    { _id: userWithComment._id, "comments._id": commentId },
+                    { $push: { "comments.$.reactions": newReaction } },
+                    { new: true }
+                );
+    
+                return updatedUser;
+            } else {
+                // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
+                const newReaction = {
+                    reaction: reaction,
+                    id_owner: userId
+                };
+    
+                // Agregar la reacción al comentario en la colección de comentarios
+                const updatedComment = await CommentModel.findOneAndUpdate(
+                    { _id: commentId },
+                    { $push: { reactions: newReaction } },
+                    { new: true }
+                );
+    
+                return updatedComment;
+            }
+        } catch (error) {
+            console.error('Error al crear reacción:', error);
+            throw error;
         }
     }
 
