@@ -3,6 +3,42 @@ type Query {
     users: [User]
     userSearchByEmail(email: String!): User
     comments: [Comment]
+    findCommentById(commentId: ID!): CommentDetailResult
+}
+
+type CommentDetailResult {
+    user_name: String
+    comment: String
+    reactions: [Reaction]
+    user_id: ID
+    comment_id: ID
+    replies: [ReplyDetail]
+}
+
+type ReplyDetail {
+    _id: ID
+    comment: String
+    id_owner: String
+    parent: ID
+    reactions: [Reaction]
+    nested_replies: [ReplyDetail]
+}
+
+type CommentDetailResultDTO {
+    user_name: String
+    comment: String
+    reactions: [Reaction]
+    user_id: ID
+    comment_id: ID
+    replies: [ReplyDetailDTO]
+}
+
+type ReplyDetailDTO {
+    comment: String
+    id_owner: String
+    parent: ID
+    reactions: [Reaction]
+    nested_replies: [ReplyDetail]
 }
 
 type Reaction {
@@ -60,9 +96,9 @@ type Mutation {
     createComment(input: CreateCommentInput!): [CommentDTO]
     updateComment(input: UpdateCommentInput!): [CommentDTO]
     deleteComment(input: DeleteCommentInput!): [CommentDTO]
-    answerComment(input: AnswerCommentInput!): Comment
-    createReaction(input: CreateReactioninput!): Comment
-    deleteReaction(input: DeleteReactionInput!): Comment
+    answerComment(input: AnswerCommentInput!): CommentDetailResultDTO
+    createReaction(input: CreateReactioninput!): CommentDetailResultDTO
+    deleteReaction(input: DeleteReactionInput!): CommentDetailResultDTO
 }
 
 

@@ -38,6 +38,14 @@ export const resolvers = {
             const users: UserDocument[] = await commentService.findAll();
             console.log(users);
             return users;
+        },
+        findCommentById: async (_root: any, params: any) => {
+            const comment: CommentDocument | null = await commentService.findByCommentId(params.commentId);
+            if(!comment){
+                throw notFoundError(`Comment with id ${params.commentId} not found`)
+            }
+            console.log(comment);
+            return await comment;
         }
 
     },
@@ -92,26 +100,35 @@ export const resolvers = {
         },
         answerComment: async (_root: any, params: any, context:any) => {
             const commentOutput: UserDocument | CommentDocument | null = await commentService.createReply(context.user.id, params.input.comment, params.input.parent);
+            if (!commentOutput.parent){
+                throw notFoundError('Parent comment not found');
+            }
+            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(commentOutput.parent);
+            console.log("Padre: ",comment);
             if(!commentOutput){
                 throw notFoundError('Parent comment not found');
             }
-            console.log(commentOutput);
-            return commentOutput;
+            return comment;
         },
         createReaction: async (_root: any, params: any, context: any) => {
             const reactionOutput: UserDocument | CommentDocument | null = await reactionService.createReaction(params.input.reaction, params.input.commentId, context.user.id);
             if(!reactionOutput){
                 throw notFoundError('Comment not found');
             }
-            console.log(reactionOutput);
-            return reactionOutput;
+            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(reactionOutput._id.toString());
+            console.log(comment);
+            
+            // console.log(reactionOutput);
+            return comment;
         },
         deleteReaction: async (_root: any, params: any,context: any) => {
             const reactionOutput = await reactionService.deleteReaction(params.input.reactionId, context.user.id, params.input.commentParentId);
             if(!reactionOutput){
                 throw notFoundError('Reaction not found');
             }
-            return reactionOutput;
+            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(params.input.commentParentId);
+            
+            return comment;
         }
 
     }

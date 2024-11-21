@@ -120,6 +120,165 @@ class CommentService {
         }
     }
 
+    // public async findByCommentId(commentIdFather: string): Promise<any> {
+
+    //     const commentId = commentIdFather.toString();
+
+    //     try {
+    //         // Realizar una agregación para buscar un comentario específico
+    //         const commentResult = await UserModel.aggregate([
+    //             { $unwind: '$comments' },
+    //             { 
+    //                 $match: { 'comments._id': new mongoose.Types.ObjectId(commentId) } 
+    //             },
+    //             {
+    //               $lookup: {
+    //                 from: 'replies', // Buscar en la colección de respuestas
+    //                 localField: 'comments._id',
+    //                 foreignField: 'parent',
+    //                 as: 'comments.replies' // Asociar respuestas a los comentarios
+    //               }
+    //             },
+    //             {
+    //               $unwind: {
+    //                 path: '$comments.replies',
+    //                 preserveNullAndEmptyArrays: true
+    //               }
+    //             },
+    //             {
+    //               $lookup: {
+    //                 from: 'replies',
+    //                 localField: 'comments.replies._id',
+    //                 foreignField: 'parent',
+    //                 as: 'comments.replies.nested_replies' // Asociar respuestas anidadas
+    //               }
+    //             },
+    //             {
+    //               $group: {
+    //                 _id: {
+    //                   user_id: '$_id',
+    //                   comment_id: '$comments._id'
+    //                 },
+    //                 user_name: { $first: '$name' }, // Agrega el nombre del usuario si lo necesitas
+    //                 comment: { $first: '$comments.comment' },
+    //                 reactions: { $first: '$comments.reactions' },
+    //                 replies: { $push: '$comments.replies' } // Agrupar respuestas
+    //               }
+    //             },
+    //             {
+    //               $project: {
+    //                 _id: 0,
+    //                 user_id: '$_id.user_id',
+    //                 user_name: 1,
+    //                 comment_id: '$_id.comment_id',
+    //                 comment: 1,
+    //                 reactions: 1,
+    //                 replies: {
+    //                   $cond: {
+    //                     if: { $eq: [{ $arrayElemAt: ['$replies._id', 0] }, null] },
+    //                     then: [],
+    //                     else: '$replies' // Condicional para manejar respuestas vacías
+    //                   }
+    //                 }
+    //               }
+    //             }
+    //           ], { maxTimeMS: 60000, allowDiskUse: true });
+            
+    //         // Retornar el primer resultado (o null si no se encuentra)
+    //         return commentResult.length > 0 ? commentResult[0] : null;
+    //     } catch (error) {
+    //         console.error("Error while fetching comment by ID:", error);
+    //         throw error;
+    //     }
+    // }
+
+    public async findByCommentId(commentIdFather: string): Promise<any> {
+
+        // console.log("Comment ID recibido:", typeof commentIdFather);
+
+        try {
+            let commentId: string;
+    
+            // Manejar diferentes tipos de entrada
+            if (typeof commentIdFather === 'string') {
+                    commentId = commentIdFather;
+            } 
+            // Si es un objeto, intentar extraer el ID
+            else if (commentIdFather && commentIdFather.toString()) {
+                commentId = commentIdFather.toString();
+            }
+            else {
+                throw new Error('Formato de ID de comentario inválido');
+            }
+    
+            // console.log("Comment ID procesado:", commentId);
+    
+            // Realizar la búsqueda con el ID procesado
+            const commentResult = await UserModel.aggregate([
+                { $unwind: '$comments' },
+                { 
+                    $match: { 'comments._id': new mongoose.Types.ObjectId(commentId) } 
+                },
+                {
+                  $lookup: {
+                    from: 'replies', // Buscar en la colección de respuestas
+                    localField: 'comments._id',
+                    foreignField: 'parent',
+                    as: 'comments.replies' // Asociar respuestas a los comentarios
+                  }
+                },
+                {
+                  $unwind: {
+                    path: '$comments.replies',
+                    preserveNullAndEmptyArrays: true
+                  }
+                },
+                {
+                  $lookup: {
+                    from: 'replies',
+                    localField: 'comments.replies._id',
+                    foreignField: 'parent',
+                    as: 'comments.replies.nested_replies' // Asociar respuestas anidadas
+                  }
+                },
+                {
+                  $group: {
+                    _id: {
+                      user_id: '$_id',
+                      comment_id: '$comments._id'
+                    },
+                    user_name: { $first: '$name' }, // Agrega el nombre del usuario si lo necesitas
+                    comment: { $first: '$comments.comment' },
+                    reactions: { $first: '$comments.reactions' },
+                    replies: { $push: '$comments.replies' } // Agrupar respuestas
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    user_id: '$_id.user_id',
+                    user_name: 1,
+                    comment_id: '$_id.comment_id',
+                    comment: 1,
+                    reactions: 1,
+                    replies: {
+                      $cond: {
+                        if: { $eq: [{ $arrayElemAt: ['$replies._id', 0] }, null] },
+                        then: [],
+                        else: '$replies' // Condicional para manejar respuestas vacías
+                      }
+                    }
+                  }
+                }
+              ], { maxTimeMS: 60000, allowDiskUse: true });
+            
+            return commentResult.length > 0 ? commentResult[0] : null;
+        } catch (error) {
+            console.error("Error al buscar comentario por ID:", error);
+            throw error;
+        }
+    }
+
     // Método para eliminar un comentario o respuesta
     public async deleteComment(idUser: string, commentId: string): Promise<UserDocument | null | CommentDocument> {
         try {

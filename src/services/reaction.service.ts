@@ -21,8 +21,15 @@ class ReactionService {
             );
     
             if (existingReaction) {
-                // La reacción ya existe, no hacer nada o manejar según tu lógica de negocio
-                return existingReaction;
+                // Si la reacción ya existe, devolver solo el ID y comentario
+                const existingComment = existingReaction.comments.find(
+                    comment => comment._id.toString() === commentId
+                );
+                
+                return {
+                    _id: existingComment._id,
+                    comment: existingComment.comment
+                };
             }
     
             // Buscar al usuario que tiene el comentario
@@ -44,7 +51,15 @@ class ReactionService {
                     { new: true }
                 );
     
-                return updatedUser;
+                // Encontrar el comentario específico
+                const updatedComment = updatedUser.comments.find(
+                    comment => comment._id.toString() === commentId
+                );
+    
+                return {
+                    _id: updatedComment._id,
+                    comment: updatedComment.comment
+                };
             } else {
                 // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
                 const newReaction = {
@@ -59,7 +74,10 @@ class ReactionService {
                     { new: true }
                 );
     
-                return updatedComment;
+                return {
+                    _id: updatedComment._id,
+                    comment: updatedComment.comment
+                };
             }
         } catch (error) {
             console.error('Error al crear reacción:', error);

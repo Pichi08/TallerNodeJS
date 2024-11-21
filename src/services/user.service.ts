@@ -97,6 +97,7 @@ class UserService {
 
     // Método para encontrar un usuario por su ID
     public async findById(id: string): Promise<UserDocument | null> {
+        console.log(id);
         try {
             // Buscar y devolver el usuario por su ID
             const user = await UserModel.findById(id);
