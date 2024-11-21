@@ -203,10 +203,6 @@ class CommentService {
             if (typeof commentIdFather === 'string') {
                     commentId = commentIdFather;
             } 
-            // Si es un objeto, intentar extraer el ID
-            else if (commentIdFather && commentIdFather.toString()) {
-                commentId = commentIdFather.toString();
-            }
             else {
                 throw new Error('Formato de ID de comentario inválido');
             }

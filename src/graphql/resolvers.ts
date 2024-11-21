@@ -103,8 +103,8 @@ export const resolvers = {
             if (!commentOutput.parent){
                 throw notFoundError('Parent comment not found');
             }
-            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(commentOutput.parent);
-            console.log("Padre: ",comment);
+            const comment: UserDocument | CommentDocument | null = await commentService.findByCommentId(commentOutput.parent.toString());
+            // console.log("Padre: ",comment);
             if(!commentOutput){
                 throw notFoundError('Parent comment not found');
             }
