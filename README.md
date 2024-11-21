@@ -1,9 +1,15 @@
-# Proyecto NODEJS
+# Proyecto NODEJS - GraphQL Edition
+
 ## Integrantes
 - Daniel Escobar Vacaflor
 - Jacobo Ossa Guarnizo
+
 ## Descripción
-El proyecto consiste en desarrollar una aplicación backend sólida utilizando Node.js junto con TypeScript para garantizar un tipado fuerte, y MongoDB como base de datos para la persistencia de la información. La aplicación está diseñada para permitir operaciones CRUD (Crear, Leer, Actualizar y Eliminar) sobre entidades como usuarios y comentarios. Adicionalmente, incluye un sistema de autenticación de usuarios para gestionar el acceso a diferentes funcionalidades, y una lógica específica para la creación y respuesta a comentarios. La administración de usuarios está restringida, de manera que solo los usuarios con el rol de superadmin tienen la capacidad de crear nuevos usuarios en la plataforma, asegurando así un control estricto sobre el acceso y la gestión de cuentas.
+
+Este proyecto consiste en desarrollar una aplicación backend robusta utilizando Node.js y TypeScript, junto con MongoDB para la persistencia de datos. En esta versión, las solicitudes y operaciones CRUD ahora se realizan a través de **GraphQL**, proporcionando una interfaz flexible para consultar y manipular datos de usuarios, comentarios y reacciones. Además, incluye un sistema de autenticación y control de acceso basado en roles.
+
+---
+
 ## Configuración y dependencias
 Para garantizar un entorno de desarrollo consistente y eficiente, se emplearon diversos paquetes tanto para el entorno de producción como de desarrollo. Algunas de las dependencias utilizadas son:
 
@@ -15,37 +21,58 @@ Para garantizar un entorno de desarrollo consistente y eficiente, se emplearon d
 - *Nodemon*: Herramienta para el desarrollo que reinicia automáticamente la aplicación cuando se detectan cambios en el código fuente.
 
 
-## *Base de Datos*
+---
 
-Para configurar el proyecto, es necesario crear un archivo .env por fuera de todas las carpetas el cual debe contener:
+## Tecnologías
 
-- *PORT=XXXX*: Define el puerto en el que la aplicación se ejecutará.
-- *MONGO_URL=XXXXXXXXXXXXX*: Proporciona la URL de conexión a la base de datos MongoDB. Esta URL incluye las credenciales y el enlace al clúster donde se almacenan los datos. Asegúrate de proteger esta información y actualizarla si es necesario.
-- *JWT_SECRET=XXXXXXXXXX*: Especifica la clave secreta utilizada para la firma y verificación de los tokens JWT (JSON Web Tokens). Esta clave es crucial para garantizar la seguridad de los tokens y prevenir la falsificación.
+- **Node.js**: Plataforma para ejecutar JavaScript del lado del servidor.
+- **TypeScript**: Lenguaje con tipado estático para mayor robustez.
+- **GraphQL**: Permite realizar consultas y mutaciones dinámicas y personalizadas.
+- **MongoDB**: Base de datos NoSQL para la persistencia de información.
+- **GraphQL Resolvers**: Lógica para manejar consultas y mutaciones.
+- **JWT (JSON Web Tokens)**: Para autenticación y manejo de sesiones.
 
+---
 
-## Tecnologias utilizadas
+## Funcionalidades
 
-- **Node.js:** Entorno de ejecución para JavaScript en el servidor.
-- **TypeScript:** Superset de JavaScript que añade tipos estáticos.
-- **MongoDB:** Base de datos NoSQL para la persistencia de datos.
-- **Express:** Framework de Node.js para aplicaciones web.
-- **JWT:** Tokens de JSON para la autenticación y autorización de usuarios.
-- **Bcrypt:** Librería para hashing de contraseñas.
-- **Zod:** Librería para validación de datos.
+### Queries
+- `user(id: ID!)`: Obtiene información de un usuario por su ID.
+- `users`: Lista todos los usuarios registrados.
+- `userSearchByEmail(email: String!)`: Busca un usuario por su correo electrónico.
+- `comments`: Devuelve una lista de comentarios con sus relaciones (usuario, reacciones, respuestas).
 
-## Estructura del proyecto
+### Mutations
+- `createUser(input: CreateUserInput!)`: Registra un nuevo usuario.
+- `login(input: LoginInput!)`: Autentica un usuario y genera un token JWT.
+- Otras mutaciones permiten gestionar comentarios, reacciones y relaciones entre entidades.
 
-El proyecto está organizado de la siguiente manera:
+---
 
-- models/: Define los modelos de datos para usuarios y eventos.
-- services/: Lógica de negocio para manejar las operaciones CRUD.
-- controllers/: Controladores para manejar las solicitudes y respuestas HTTP.
-- middlewares/: Middlewares para la autenticación, autorización y validación de datos.
-- schemas/: Esquemas Zod para la validación de datos.
-- routes/: Rutas de la aplicación Express.
+## Estructura del Proyecto
 
+- **src/config**: Configuración general del proyecto (puertos, MongoDB, JWT).
+- **src/middlewares**: Middleware para autenticación y validación.
+- **src/graphql**: 
+  - `schema.graphql`: Define el esquema GraphQL (tipos, queries, mutaciones).
+  - `resolvers.ts`: Implementa la lógica para manejar las solicitudes de GraphQL.
+- **src/controllers**: Controladores para operaciones específicas.
+- **src/model**: Modelos de datos en MongoDB.
+- **src/services**: Lógica de negocio para usuarios, comentarios y reacciones.
+- **src/routes**: (Herencia del sistema HTTP, no usado directamente en GraphQL).
 
+---
+
+## Autenticación y Control de Roles
+
+- **Autenticación**: 
+  - Utiliza JWT para validar usuarios y proteger recursos.
+  - El endpoint de login devuelve un token que debe incluirse en las cabeceras de las solicitudes GraphQL.
+
+- **Control de Roles**:
+  - Implementado a través de la función `checkRole`, que valida si un usuario tiene los permisos necesarios antes de ejecutar operaciones sensibles.
+
+---
 
 ## Como iniciar
 
@@ -59,9 +86,7 @@ Para configurar y ejecutar el proyecto, sigue estos pasos:
 6. Configura las variables de entorno creando un archivo .env en la raíz del proyecto y añade las siguientes variables como  ya se había especificado antes. 
 7. Ejecuta el servidor: yarn dev
 
-## Documentación de la API
-
-La API soporta las siguientes operaciones:
+## Documentacion de la API
 
 - *Usuarios*
     - Login
@@ -74,32 +99,505 @@ La API soporta las siguientes operaciones:
 - *Reacciones*
     - Creación y eliminación de usuarios.
 
-Las rutas específicas y ejemplos de uso se encuentran documentadas en el archivo Postman_collection.json incluido en el repositorio. Aun así, las rutas disponibles son (todas iniciando con localhost:3001 si está local):
+## Queries
 
-### Usuarios
+**Obtener un Usuario por ID**
 
-- api/users/login | post | login a la aplicación
-- api/users/ | post | crear un usuario
-- api/users/:idUser | put | actualizar un usuario
-- api/users/:idUser | delete | eliminar un usuario
-- api/users/ | get | obtener todos los usuarios
+- **Descripción**: Devuelve los detalles de un usuario específico.
+- **Tipo**: Query
+- **Endpoint**: GraphQL `/graphql`
+- **Ejemplo de Consulta**:
 
-### Comentarios
+**Ejemplo Estructura**
 
-- api/comment/ | post | crear un comentario
-- api/comment/reply | post | contestar a un comentario
-- api/comment/:idComment | delete | eliminar un comentario
-- api/comment/:idComment | pul | actualizar un comentario
-- api/comment/ | get | get | obtener todos los comentarios con sus respuestas y reacciones
+```bash
+query {
+  user(id: "63f8f8b3c3e3f1e7e4a6f7f8") {
+    id
+    name
+    email
+    rol
+  }
+}
+```
 
-### Reacciones
+**Respuesta**
 
-- api/reactions/ | post | crear una reacción
-- api/reactions/ | delete | eliminar una reacción
+```bash
+{
+  "data": {
+    "user": {
+      "id": "63f8f8b3c3e3f1e7e4a6f7f8",
+      "name": "Juan Pérez",
+      "email": "juan.perez@example.com",
+      "rol": "user"
+    }
+  }
+}
+```
 
----
+**Listar Usuarios**
 
-## Desafios y elementos pendientes
+- **Descripción**: Devuelve una lista de todos los usuarios registrados.
+- **Tipo**: Query
+- **Ejemplo de Consulta**:
 
-- Integración de pruebas unitarias y de integración.
-- Mejora en el sistema de logging para depuración y monitoreo.
+**Ejemplo Estructura**
+
+```bash
+query {
+  users {
+    id
+    name
+    email
+    rol
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "users": [
+      {
+        "id": "63f8f8b3c3e3f1e7e4a6f7f8",
+        "name": "Juan Pérez",
+        "email": "juan.perez@example.com",
+        "rol": "user"
+      },
+      {
+        "id": "63f8f8b4c4e3f2e7e4a6f7f9",
+        "name": "Ana López",
+        "email": "ana.lopez@example.com",
+        "rol": "admin"
+      }
+    ]
+  }
+}
+```
+
+**Buscar Usuario por Email**
+
+- **Descripción**: Encuentra un usuario por su correo electrónico.
+- **Tipo**: Query
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+query {
+  userSearchByEmail(email: "juan.perez@example.com") {
+    id
+    name
+    email
+    rol
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "userSearchByEmail": {
+      "id": "63f8f8b3c3e3f1e7e4a6f7f8",
+      "name": "Juan Pérez",
+      "email": "juan.perez@example.com",
+      "rol": "user"
+    }
+  }
+}
+```
+
+**Listar Comentarios**
+
+- **Descripción**: Devuelve una lista de comentarios con detalles de usuario, reacciones y respuestas.
+- **Tipo**: Query
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+query {
+  comments {
+    id
+    comment
+    user {
+      name
+    }
+    reactions {
+      reaction
+    }
+    replies {
+      comment
+    }
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "comments": [
+      {
+        "id": "12345",
+        "comment": "Este es un comentario",
+        "user": {
+          "name": "Juan Pérez"
+        },
+        "reactions": [
+          {
+            "reaction": "Me gusta"
+          }
+        ],
+        "replies": [
+          {
+            "comment": "Esta es una respuesta"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Mutations
+
+1. **Crear Usuario**
+    - **Descripción**: Crea un nuevo usuario y devuelve su token de autenticación.
+    - **Tipo**: Mutation
+    - **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  createUser(input: {
+    name: "Juan Pérez",
+    email: "juan.perez@example.com",
+    password: "1234",
+    rol: "user"
+  }) {
+    email
+    token
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "createUser": {
+      "email": "juan.perez@example.com",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+    }
+  }
+}
+```
+
+**Iniciar Sesión**
+
+- **Descripción**: Autentica un usuario y devuelve un token de acceso.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  login(input: {
+    email: "juan.perez@example.com",
+    password: "1234"
+  }) {
+    email
+    token
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "login": {
+      "email": "juan.perez@example.com",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+    }
+  }
+}
+```
+
+**Crear Comentario**
+
+- **Descripción**: Agrega un nuevo comentario a la base de datos.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  createComment(input: {
+    comment: "Este es un comentario",
+    userId: "63f8f8b3c3e3f1e7e4a6f7f8"
+  }) {
+    id
+    comment
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "createComment": {
+      "id": "12345",
+      "comment": "Este es un comentario"
+    }
+  }
+}
+```
+
+**Actualizar Usuario (`updateUser`)**
+
+- **Descripción**: Actualiza los datos de un usuario existente.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  updateUser(id: "63f8f8b3c3e3f1e7e4a6f7f8", input: {
+    name: "Juan Actualizado",
+    email: "juan.actualizado@example.com",
+    rol: "admin"
+  }) {
+    id
+    name
+    email
+    rol
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "updateUser": {
+      "id": "63f8f8b3c3e3f1e7e4a6f7f8",
+      "name": "Juan Actualizado",
+      "email": "juan.actualizado@example.com",
+      "rol": "admin"
+    }
+  }
+}
+```
+
+**Eliminar Usuario (`deleteUser`)**
+
+- **Descripción**: Elimina un usuario por su ID.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  deleteUser(id: "63f8f8b3c3e3f1e7e4a6f7f8") {
+    id
+    name
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "deleteUser": {
+      "id": "63f8f8b3c3e3f1e7e4a6f7f8",
+      "name": "Juan Pérez"
+    }
+  }
+}
+```
+
+**Actualizar Comentario (`updateComment`)**
+
+- **Descripción**: Actualiza el contenido de un comentario existente.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  updateComment(id: "12345", input: {
+    comment: "Este comentario fue actualizado"
+  }) {
+    id
+    comment
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "updateComment": {
+      "id": "12345",
+      "comment": "Este comentario fue actualizado"
+    }
+  }
+}
+
+```
+
+**Eliminar Comentario (`deleteComment`)**
+
+- **Descripción**: Elimina un comentario por su ID.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  deleteComment(id: "12345") {
+    id
+    comment
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "deleteComment": {
+      "id": "12345",
+      "comment": "Este es un comentario"
+    }
+  }
+}
+```
+
+**Responder Comentario (`answerComment`)**
+
+- **Descripción**: Crea una respuesta a un comentario existente.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  answerComment(id: "12345", input: {
+    comment: "Esta es una respuesta"
+  }) {
+    id
+    comment
+    replies {
+      id
+      comment
+    }
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "answerComment": {
+      "id": "12345",
+      "comment": "Este es un comentario",
+      "replies": [
+        {
+          "id": "67890",
+          "comment": "Esta es una respuesta"
+        }
+      ]
+    }
+  }
+}
+```
+
+**Crear Reacción (`createReaction`)**
+
+- **Descripción**: Agrega una reacción a un comentario.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  createReaction(input: {
+    commentId: "12345",
+    reaction: "Me gusta"
+  }) {
+    id
+    reaction
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+{
+  "data": {
+    "createReaction": {
+      "id": "98765",
+      "reaction": "Me gusta"
+    }
+  }
+}
+```
+
+**Eliminar Reacción (`deleteReaction`)**
+
+- **Descripción**: Elimina una reacción por su ID.
+- **Tipo**: Mutation
+- **Ejemplo de Consulta**:
+
+**Ejemplo Estructura**
+
+```bash
+mutation {
+  deleteReaction(id: "98765") {
+    id
+    reaction
+  }
+}
+```
+
+**Respuesta**
+
+```bash
+mutation {
+  deleteReaction(id: "98765") {
+    id
+    reaction
+  }
+}
+```
