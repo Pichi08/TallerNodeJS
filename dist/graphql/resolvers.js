@@ -28,7 +28,19 @@ export const resolvers = {
             }
             return user;
         },
-        comments: async (_root) => commentService.findAll(),
+        comments: async (_root) => {
+            const users = await commentService.findAll();
+            console.log(users);
+            return users;
+        },
+        findCommentById: async (_root, params) => {
+            const comment = await commentService.findByCommentId(params.commentId);
+            if (!comment) {
+                throw notFoundError(`Comment with id ${params.commentId} not found`);
+            }
+            console.log(comment);
+            return await comment;
+        }
     },
     Mutation: {
         createUser: async (_root, params, context) => {
@@ -66,39 +78,52 @@ export const resolvers = {
         },
         updateComment: async (_root, params, context) => {
             const comment = params.input.comment;
-            const commentOutput = await commentService.updateComment(context.user.id, params.input.idComment, comment);
+            const commentOutput = await commentService.updateCommentInMyDocument(context.user.id, params.input.idComment, comment);
             if (!commentOutput) {
-                throw forbiddenError('You do not have permission to update this comment');
+                const replyOutput = await commentService.updateCommentInReplies(context.user.id, params.input.idComment, comment);
+                if (!replyOutput) {
+                    throw notFoundError('Comment not found');
+                }
+                return { "comment": 'Comment with ID ' + replyOutput.id + ' updated successfully' };
             }
-            return commentOutput;
+            return commentOutput.comments;
         },
         deleteComment: async (_root, params, context) => {
             const commentOutput = await commentService.deleteComment(context.user.id, params.input.idComment);
             if (!commentOutput) {
                 throw forbiddenError('You do not have permission to delete this comment');
             }
-            return commentOutput;
+            return 'Comment deleted successfully';
         },
         answerComment: async (_root, params, context) => {
             const commentOutput = await commentService.createReply(context.user.id, params.input.comment, params.input.parent);
+            if (!commentOutput.parent) {
+                throw notFoundError('Parent comment not found');
+            }
+            const comment = await commentService.findByCommentId(commentOutput.parent.toString());
+            // console.log("Padre: ",comment);
             if (!commentOutput) {
                 throw notFoundError('Parent comment not found');
             }
-            return commentOutput;
+            return comment;
         },
         createReaction: async (_root, params, context) => {
             const reactionOutput = await reactionService.createReaction(params.input.reaction, params.input.commentId, context.user.id);
             if (!reactionOutput) {
                 throw notFoundError('Comment not found');
             }
-            return reactionOutput;
+            const comment = await commentService.findByCommentId(params.input.commentId);
+            console.log(comment);
+            // console.log(reactionOutput);
+            return comment;
         },
         deleteReaction: async (_root, params, context) => {
             const reactionOutput = await reactionService.deleteReaction(params.input.reactionId, context.user.id, params.input.commentParentId);
             if (!reactionOutput) {
                 throw notFoundError('Reaction not found');
             }
-            return reactionOutput;
+            const comment = await commentService.findByCommentId(params.input.commentParentId);
+            return comment;
         }
     }
 };

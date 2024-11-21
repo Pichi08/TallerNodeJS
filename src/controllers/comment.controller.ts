@@ -59,7 +59,7 @@ class commentController {
             const idComment = req.params.idComment;
             const comment = req.body as Comment;
             // Llamamos al servicio para actualizar el comentario
-            const user: UserDocument | null | CommentDocument = await commentService.updateComment(idUser, idComment, comment);
+            const user: UserDocument | null | CommentDocument = await commentService.updateCommentInMyDocument(idUser, idComment, comment);
             if(!user){
                 res.status(404).json({ message: "Comment not found or does not belong to the user" });
             } else {

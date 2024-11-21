@@ -16,7 +16,7 @@ app.use(express.json()); // Middleware para parsear cuerpos de solicitud JSON
 app.use(express.urlencoded({ extended: true })); // Middleware para parsear cuerpos de solicitud URL-encoded
 app.use(cors());
 const port = process.env.PORT;
-let typeDefs = await readFile('./graphql/schema.graphql', 'utf-8');
+let typeDefs = await readFile('src/graphql/schema.graphql', 'utf-8');
 const apolloServer = new ApolloServer({ typeDefs, resolvers,
     formatError: (error) => {
         return {

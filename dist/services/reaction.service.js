@@ -4,29 +4,43 @@ import mongoose from "mongoose";
 class ReactionService {
     // Método para crear una reacción en un comentario
     async createReaction(reaction, commentId, userId) {
-        // Buscar al usuario que tiene el comentario
-        const userWithComment = await UserModel.findOne({ "comments._id": commentId });
-        if (userWithComment) {
-            // Crear una nueva reacción
-            const newReaction = {
-                reaction: reaction,
-                id_owner: userId
-            };
-            // Agregar la reacción al comentario del usuario
-            const updatedUser = await UserModel.findOneAndUpdate({ _id: userWithComment._id, "comments._id": commentId }, { $push: { "comments.$.reactions": newReaction } }, { new: true } // Retornar el documento actualizado
-            );
-            return updatedUser;
+        try {
+            // Buscar al usuario que tiene el comentario
+            const userWithComment = await UserModel.findOne({ "comments._id": commentId });
+            console.log(userWithComment);
+            if (userWithComment) {
+                // Crear una nueva reacción
+                const newReaction = {
+                    reaction: reaction,
+                    id_owner: userId
+                };
+                console.log(newReaction);
+                // Agregar la reacción al comentario del usuario
+                const updatedUser = await UserModel.findOneAndUpdate({ _id: userWithComment._id, "comments._id": commentId }, { $push: { "comments.$.reactions": newReaction } }, { new: true });
+                return updatedUser;
+            }
+            else {
+                // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
+                const newReaction = {
+                    reaction: reaction,
+                    id_owner: userId
+                };
+                // Agregar la reacción al comentario en la colección de comentarios
+                const updatedComment = await CommentModel.findOneAndUpdate({ _id: commentId }, { $push: { reactions: newReaction } }, { new: true });
+                if (updatedComment) {
+                    return {
+                        _id: updatedComment._id,
+                        comment: updatedComment.comment
+                    };
+                }
+                else {
+                    throw new Error('Comment not found');
+                }
+            }
         }
-        else {
-            // Si el comentario no está en los comentarios de un usuario, buscar en la colección de comentarios
-            const newReaction = {
-                reaction: reaction,
-                id_owner: userId
-            };
-            // Agregar la reacción al comentario en la colección de comentarios
-            const updatedComment = await CommentModel.findOneAndUpdate({ _id: commentId }, { $push: { reactions: newReaction } }, { new: true } // Retornar el documento actualizado
-            );
-            return updatedComment;
+        catch (error) {
+            console.error('Error al crear reacción:', error);
+            throw error;
         }
     }
     // Método para eliminar una reacción de un comentario
